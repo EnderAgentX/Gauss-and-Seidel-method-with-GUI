@@ -31,7 +31,7 @@ type vector []float64
 func main() {
 	newApp := app.New()
 	w := newApp.NewWindow("Метод Гаусса")
-	w.Resize(fyne.NewSize(1820, 980))
+	w.Resize(fyne.NewSize(300, 400))
 	w.CenterOnScreen()
 
 	label := widget.NewLabel("Введите размер матрицы ")
@@ -44,7 +44,7 @@ func main() {
 	answer := widget.NewLabel("")
 
 	scr := container.NewVScroll(answer)
-	scr.SetMinSize(fyne.NewSize(400, 600))
+	scr.SetMinSize(fyne.NewSize(300, 300))
 
 	btn := widget.NewButton("Посчитать", func() {
 		flag := false
@@ -53,7 +53,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
 		splitFunc := func(r rune) bool {
 			return strings.ContainsRune(", ", r)
 		}
@@ -187,22 +186,11 @@ func main() {
 		flag = false
 	})
 
-	//box1 := container.NewVBox(label, entry)
-	//box2 := container.NewVBox(label1, entry1)
-	//box3 := container.NewVBox(label2, entry2, btn)
-
 	w.SetContent(container.NewVBox(
-		/*
-			box1,
-			box2,
-			box3,
-			answer,
-			scr,
-		*/
-
 		label, entry,
 		label1, entry1,
-		label2, entry2, btn,
+		label2, entry2,
+		btn,
 		scr,
 	))
 
@@ -220,11 +208,8 @@ func (a matrix) dump(index []int, answer *widget.Label) {
 			if a[i][index[j]] == 0 {
 				// необходимо чтобы избавиться от -0
 				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", 0.0)
-				//fmt.Printf("[0] ")
 			} else {
 				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", a[i][index[j]])
-
-				//fmt.Printf("[%v] ", a[i][index[j]])
 				answer.SetText(answer.Text)
 			}
 		}
