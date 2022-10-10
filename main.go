@@ -44,7 +44,7 @@ func main() {
 	answer := widget.NewLabel("")
 
 	scr := container.NewVScroll(answer)
-	scr.SetMinSize(fyne.NewSize(400, 150))
+	scr.SetMinSize(fyne.NewSize(400, 600))
 
 	btn := widget.NewButton("Посчитать", func() {
 		flag := false
@@ -199,10 +199,10 @@ func main() {
 			answer,
 			scr,
 		*/
+
 		label, entry,
 		label1, entry1,
 		label2, entry2, btn,
-		answer,
 		scr,
 	))
 
