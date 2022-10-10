@@ -43,6 +43,9 @@ func main() {
 
 	answer := widget.NewLabel("")
 
+	scr := container.NewVScroll(answer)
+	scr.SetMinSize(fyne.NewSize(400, 150))
+
 	btn := widget.NewButton("Посчитать", func() {
 		flag := false
 		answer.SetText("")
@@ -184,15 +187,23 @@ func main() {
 		flag = false
 	})
 
-	box1 := container.NewVBox(label, entry)
-	box2 := container.NewVBox(label1, entry1)
-	box3 := container.NewVBox(label2, entry2, btn)
+	//box1 := container.NewVBox(label, entry)
+	//box2 := container.NewVBox(label1, entry1)
+	//box3 := container.NewVBox(label2, entry2, btn)
 
-	w.SetContent(container.NewHBox(
-		box1,
-		box2,
-		box3,
+	w.SetContent(container.NewVBox(
+		/*
+			box1,
+			box2,
+			box3,
+			answer,
+			scr,
+		*/
+		label, entry,
+		label1, entry1,
+		label2, entry2, btn,
 		answer,
+		scr,
 	))
 
 	w.ShowAndRun()
