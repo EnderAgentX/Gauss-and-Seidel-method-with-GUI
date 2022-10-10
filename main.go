@@ -184,14 +184,14 @@ func main() {
 		flag = false
 	})
 
-	w.SetContent(container.NewVBox(
-		label,
-		entry,
-		label1,
-		entry1,
-		label2,
-		entry2,
-		btn,
+	box1 := container.NewVBox(label, entry)
+	box2 := container.NewVBox(label1, entry1)
+	box3 := container.NewVBox(label2, entry2, btn)
+
+	w.SetContent(container.NewHBox(
+		box1,
+		box2,
+		box3,
 		answer,
 	))
 
