@@ -23,6 +23,14 @@ import (
   1,-3,1,0,0,-2,0,11,-20
   -6,2,42
   Ответ: 1, 2, -1
+
+ Вариант
+3
+7.6 5.8 4.7 3.8 4.1 2.7 2.9 2.1 3.8
+10.1 9.7 7.8
+-2.5 3.2 2.1
+
+
 */
 
 type matrix [][]float64
@@ -100,7 +108,7 @@ func main() {
 
 		// отображаем исходные данные
 		a.dump(index, answer)
-		b.dump(answer)
+		b.dump(index, answer)
 
 		// прямой ход (Зануляю элементы под главной диагональю)
 		for i := 0; i < len(a); i++ {
@@ -130,7 +138,7 @@ func main() {
 				r = a[i][index[i]]
 			}
 
-			// если главный элемент строки равен 0, метод гаусса не работает
+			// если главный элемент строки равен 0, метод Гаусса не работает
 			if r == 0 {
 				if b[i] == 0 {
 					answer.SetText("система имеет множество решений")
@@ -158,7 +166,7 @@ func main() {
 
 			// отображаем дамп матрицы A и вектора B
 			a.dump(index, answer)
-			b.dump(answer)
+			b.dump(index, answer)
 		}
 
 		var x vector = make(vector, len(b))
@@ -178,7 +186,11 @@ func main() {
 		if !flag {
 			answer.Text = answer.Text + "Вектор X\n"
 			for i := 0; i < len(x); i++ {
-				answer.Text = answer.Text + fmt.Sprintf("%9.2v ", x[index[i]])
+				if x[index[i]] == 0.0 || math.Abs(x[index[i]]) < 0.00000001 {
+					answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+				} else {
+					answer.Text = answer.Text + fmt.Sprintf("%9f ", x[index[i]])
+				}
 			}
 		}
 
@@ -205,11 +217,11 @@ func (a matrix) dump(index []int, answer *widget.Label) {
 	answer.SetText(answer.Text)
 	for i := range a {
 		for j := range a[i] {
-			if a[i][index[j]] == 0 {
+			if a[i][index[j]] == -0 || math.Abs(a[i][index[j]]) < 0.00000001 {
 				// необходимо чтобы избавиться от -0
-				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", 0.0)
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
 			} else {
-				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", a[i][index[j]])
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", a[i][index[j]])
 				answer.SetText(answer.Text)
 			}
 		}
@@ -221,12 +233,16 @@ func (a matrix) dump(index []int, answer *widget.Label) {
 }
 
 // отображение дампа вектора
-func (b vector) dump(answer *widget.Label) {
+func (b vector) dump(index []int, answer *widget.Label) {
 	answer.Text = answer.Text + "Вектор\n"
 	answer.SetText(answer.Text)
 
 	for i := 0; i < len(b); i++ {
-		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", b[i])
+		if b[index[i]] == -0 || math.Abs(b[index[i]]) < 0.00000001 {
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+		} else {
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", b[index[i]])
+		}
 		answer.SetText(answer.Text)
 	}
 
