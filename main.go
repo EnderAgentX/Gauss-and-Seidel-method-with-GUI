@@ -46,7 +46,7 @@ func main() {
 	scr := container.NewVScroll(answer)
 	scr.SetMinSize(fyne.NewSize(300, 300))
 
-	btn := widget.NewButton("Посчитать", func() {
+	btn1 := widget.NewButton("Посчитать методом Гаусса", func() {
 		flag := false
 		answer.SetText("")
 		n, err := strconv.Atoi(entry.Text)
@@ -99,8 +99,7 @@ func main() {
 		}
 
 		// отображаем исходные данные
-		a.dump(index, answer)
-		b.dump(answer)
+		a.dump(index, answer, b)
 
 		// прямой ход (Зануляю элементы под главной диагональю)
 		for i := 0; i < len(a); i++ {
@@ -157,8 +156,7 @@ func main() {
 			}
 
 			// отображаем дамп матрицы A и вектора B
-			a.dump(index, answer)
-			b.dump(answer)
+			a.dump(index, answer, b)
 		}
 
 		var x vector = make(vector, len(b))
@@ -185,12 +183,126 @@ func main() {
 		answer.SetText(answer.Text)
 		flag = false
 	})
+	btn2 := widget.NewButton("Посчитать методом Зейделя", func() {
+		//flag := false
+		answer.SetText("")
+		n, err := strconv.Atoi(entry.Text)
+		if err != nil {
+			panic(err)
+		}
+		splitFunc := func(r rune) bool {
+			return strings.ContainsRune(", ", r)
+		}
+
+		numsStr := strings.FieldsFunc(entry1.Text, splitFunc)
+		vecStr := strings.FieldsFunc(entry2.Text, splitFunc)
+
+		nums := make([]float64, n*n)
+		vecs := make([]float64, n)
+
+		for i := 0; i < len(numsStr); i++ {
+			nums[i], err = strconv.ParseFloat(numsStr[i], 64)
+		}
+		for i := 0; i < len(vecStr); i++ {
+			vecs[i], err = strconv.ParseFloat(vecStr[i], 64)
+		}
+
+		if err != nil {
+			panic(err)
+		}
+
+		a := make(matrix, n)
+		//b := make(vector, n)
+
+		for i := range a {
+			a[i] = make([]float64, n+1)
+		}
+
+		cnt := 0
+		for i := 0; i < n; i++ {
+			for j := 0; j < n; j++ {
+				a[i][j] = nums[cnt]
+				cnt++
+			}
+			a[i][n] = vecs[i]
+		}
+		//----------------------------------------------
+		var eps float64
+		fmt.Scan(&eps)
+
+		maxEl := 0.0
+		maxId := 0
+
+		for i := 0; i < n; i++ {
+			for j := i; j < n; j++ {
+				if math.Abs(a[j][i]) > maxEl {
+					maxEl = math.Abs(a[j][i])
+					maxId = j
+				}
+			}
+			a[i], a[maxId] = a[maxId], a[i]
+
+			maxEl = 0
+			maxId = 0
+
+		}
+
+		previousVariableValues := make(vector, n)
+		for i := 0; i < n; i++ {
+			previousVariableValues[i] = 0.0
+		}
+
+		for {
+			currentVariableValues := make(vector, n)
+			for i := 0; i < n; i++ {
+				currentVariableValues[i] = a[i][n]
+				for j := 0; j < n; j++ {
+					// При j < i можем использовать уже посчитанные
+					// на этой итерации значения неизвестных
+					if j < i {
+						currentVariableValues[i] -= a[i][j] * currentVariableValues[j]
+					}
+
+					// При j > i используем значения с прошлой итерации
+					if j > i {
+						currentVariableValues[i] -= a[i][j] * previousVariableValues[j]
+					}
+				}
+				currentVariableValues[i] /= a[i][i]
+			}
+
+			errEps := 0.0
+
+			for i := 0; i < n; i++ {
+				errEps += math.Abs(currentVariableValues[i] - previousVariableValues[i])
+			}
+
+			// Если необходимая точность достигнута, то завершаем процесс
+			if errEps < eps {
+				break
+			}
+
+			// Переходим к следующей итерации, так
+			// что текущие значения неизвестных
+			// становятся значениями на предыдущей итерации
+			previousVariableValues = currentVariableValues
+		}
+
+		// Выводим найденные значения неизвестных с 8 знаками точности
+		for i := 0; i < n; i++ {
+			fmt.Printf("%.8f ", previousVariableValues[i])
+		}
+
+		return
+
+	})
 
 	w.SetContent(container.NewVBox(
 		label, entry,
 		label1, entry1,
 		label2, entry2,
-		btn,
+		btn1,
+		btn2,
 		scr,
 	))
 
@@ -200,7 +312,7 @@ func main() {
 
 // отображение дампа матрицы
 
-func (a matrix) dump(index []int, answer *widget.Label) {
+func (a matrix) dump(index []int, answer *widget.Label, b vector) {
 	answer.Text = answer.Text + "Матрица\n"
 	answer.SetText(answer.Text)
 	for i := range a {
@@ -213,25 +325,15 @@ func (a matrix) dump(index []int, answer *widget.Label) {
 				answer.SetText(answer.Text)
 			}
 		}
+		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", "")
+		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", b[index[i]])
+		answer.SetText(answer.Text)
 		answer.Text = answer.Text + fmt.Sprint("\n")
 		answer.SetText(answer.Text)
 	}
 	answer.Text = answer.Text + fmt.Sprint("\n")
-	answer.SetText(answer.Text)
-}
-
-// отображение дампа вектора
-func (b vector) dump(answer *widget.Label) {
-	answer.Text = answer.Text + "Вектор\n"
-	answer.SetText(answer.Text)
-
-	for i := 0; i < len(b); i++ {
-		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", b[i])
-		answer.SetText(answer.Text)
-	}
-
-	answer.Text = answer.Text + fmt.Sprint("\n")
 	answer.Text = answer.Text + fmt.Sprint("-----------------------------")
 	answer.Text = answer.Text + fmt.Sprint("\n")
+	answer.SetText(answer.Text)
 	answer.SetText(answer.Text)
 }
