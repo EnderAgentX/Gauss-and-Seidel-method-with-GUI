@@ -379,7 +379,7 @@ func (a matrix) dumpSeidel(answer *widget.Label) {
 	answer.Text = answer.Text + "Матрица\n"
 	answer.SetText(answer.Text)
 	for i := range a {
-		for j := range a[i] {
+		for j := 0; j < len(a[i])-1; j++ {
 			if a[i][j] == -0 || math.Abs(a[i][j]) < 0.00000001 {
 				// необходимо чтобы избавиться от -0
 				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
