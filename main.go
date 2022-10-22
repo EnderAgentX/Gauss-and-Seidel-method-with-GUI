@@ -112,24 +112,23 @@ func main() {
 			// если главный элемент равен нулю, нужно найти другой
 			// методом перестановки колонок в матрице
 			if r == 0 {
-				var kk int
+				maxEl := 0.0
+				maxId := 0
 
-				// двигаемся вправо от диагонального элемента, для поиска максимального по модулю элемента
-				for k := i; k < len(a); k++ {
-					if math.Abs(a[i][index[k]]) > r {
-						kk = k
+				for j := i; j < n; j++ {
+					if math.Abs(a[j][i]) > maxEl {
+						maxEl = math.Abs(a[j][i])
+						maxId = j
 					}
 				}
+				a[i], a[maxId] = a[maxId], a[i]
+				b[i], b[maxId] = b[maxId], b[i]
 
-				// если удалось найти главный элемент
-				if kk > 0 {
-					// меняем местами колонки, так чтобы главный элемент встал в диагональ матрицы
-					index[i], index[kk] = index[kk], index[i]
-				}
+				maxEl = 0
+				maxId = 0
 
-				// получаем главный элемента, текущей строки из диагонали
-				r = a[i][index[i]]
 			}
+			r = a[i][i]
 
 			// если главный элемент строки равен 0, метод гаусса не работает
 			if r == 0 {
@@ -178,15 +177,22 @@ func main() {
 		if !flag {
 			answer.Text = answer.Text + "Вектор X\n"
 			for i := 0; i < len(x); i++ {
-				answer.Text = answer.Text + fmt.Sprintf("%9f ", x[index[i]])
+				if x[index[i]] == 0.0 || math.Abs(x[index[i]]) < 0.00000001 {
+					answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+				} else {
+					answer.Text = answer.Text + fmt.Sprintf("%9f ", x[index[i]])
+				}
 			}
 		}
 
 		answer.SetText(answer.Text)
 		flag = false
 	})
+
+	//-------------------------------------------------------------------------------------------------
+
 	btn2 := widget.NewButton("Посчитать методом Зейделя", func() {
-		//flag := false
+		flag := false
 		var eps float64
 		answer.SetText("")
 		n, err := strconv.Atoi(entry.Text)
@@ -237,68 +243,89 @@ func main() {
 		maxEl := 0.0
 		maxId := 0
 
+		r := a[0][0]
+
 		for i := 0; i < n; i++ {
 			for j := i; j < n; j++ {
 				if math.Abs(a[j][i]) > maxEl {
 					maxEl = math.Abs(a[j][i])
 					maxId = j
 				}
+
 			}
 			a[i], a[maxId] = a[maxId], a[i]
 
 			maxEl = 0
 			maxId = 0
-
-		}
-
-		a.dumpSeidel(answer)
-
-		previousVariableValues := make(vector, n)
-		for i := 0; i < n; i++ {
-			previousVariableValues[i] = 0.0
-		}
-
-		for {
-			currentVariableValues := make(vector, n)
-			for i := 0; i < n; i++ {
-				currentVariableValues[i] = a[i][n]
-				for j := 0; j < n; j++ {
-					// При j < i можем использовать уже посчитанные
-					// на этой итерации значения неизвестных
-					if j < i {
-						currentVariableValues[i] -= a[i][j] * currentVariableValues[j]
-					}
-
-					// При j > i используем значения с прошлой итерации
-					if j > i {
-						currentVariableValues[i] -= a[i][j] * previousVariableValues[j]
-					}
+			r = a[i][i]
+			if r == 0 {
+				if a[i][len(a)] == 0 {
+					answer.SetText("система имеет множество решений")
+				} else {
+					answer.SetText("система не имеет решений")
 				}
-				currentVariableValues[i] /= a[i][i]
-			}
-
-			errEps := 0.0
-
-			for i := 0; i < n; i++ {
-				errEps += math.Abs(currentVariableValues[i] - previousVariableValues[i])
-			}
-
-			// Если необходимая точность достигнута, то завершаем процесс
-			if errEps < eps {
+				flag = true
 				break
 			}
 
-			// Переходим к следующей итерации, так
-			// что текущие значения неизвестных
-			// становятся значениями на предыдущей итерации
-			previousVariableValues = currentVariableValues
 		}
+		if !flag {
+			a.dumpSeidel(answer)
 
-		answer.Text = answer.Text + "Вектор X\n"
-		for i := 0; i < n; i++ {
-			answer.Text = answer.Text + fmt.Sprintf("%9f ", previousVariableValues[i])
+			previousVariableValues := make(vector, n)
+			for i := 0; i < n; i++ {
+				previousVariableValues[i] = 0.0
+			}
+
+			for {
+				currentVariableValues := make(vector, n)
+				for i := 0; i < n; i++ {
+					currentVariableValues[i] = a[i][n]
+					for j := 0; j < n; j++ {
+						// При j < i можем использовать уже посчитанные
+						// на этой итерации значения неизвестных
+						if j < i {
+							currentVariableValues[i] -= a[i][j] * currentVariableValues[j]
+						}
+
+						// При j > i используем значения с прошлой итерации
+						if j > i {
+							currentVariableValues[i] -= a[i][j] * previousVariableValues[j]
+						}
+					}
+					currentVariableValues[i] /= a[i][i]
+				}
+
+				errEps := 0.0
+
+				for i := 0; i < n; i++ {
+					errEps += math.Abs(currentVariableValues[i] - previousVariableValues[i])
+				}
+
+				// Если необходимая точность достигнута, то завершаем процесс
+				if errEps < eps {
+					break
+				}
+
+				// Переходим к следующей итерации, так
+				// что текущие значения неизвестных
+				// становятся значениями на предыдущей итерации
+				previousVariableValues = currentVariableValues
+			}
+
+			answer.Text = answer.Text + "Вектор X\n"
+
+			for i := 0; i < n; i++ {
+				if previousVariableValues[i] == 0.0 || math.Abs(previousVariableValues[i]) < 0.00000001 {
+					answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+				} else {
+					answer.Text = answer.Text + fmt.Sprintf("%9f ", previousVariableValues[i])
+				}
+
+			}
 		}
 		answer.SetText(answer.Text)
+		flag = false
 
 	})
 
@@ -323,7 +350,7 @@ func (a matrix) dump(index []int, answer *widget.Label, b vector) {
 	answer.SetText(answer.Text)
 	for i := range a {
 		for j := range a[i] {
-			if a[i][index[j]] == 0 {
+			if a[i][index[j]] == -0 || math.Abs(a[i][index[j]]) < 0.00000001 {
 				// необходимо чтобы избавиться от -0
 				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
 			} else {
@@ -332,7 +359,11 @@ func (a matrix) dump(index []int, answer *widget.Label, b vector) {
 			}
 		}
 		answer.Text = answer.Text + fmt.Sprintf("%9v ", "")
-		answer.Text = answer.Text + fmt.Sprintf("%9f ", b[index[i]])
+		if b[index[i]] == -0 || math.Abs(b[index[i]]) < 0.00000001 {
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+		} else {
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", b[index[i]])
+		}
 		answer.SetText(answer.Text)
 		answer.Text = answer.Text + fmt.Sprint("\n")
 		answer.SetText(answer.Text)
@@ -349,7 +380,7 @@ func (a matrix) dumpSeidel(answer *widget.Label) {
 	answer.SetText(answer.Text)
 	for i := range a {
 		for j := range a[i] {
-			if a[i][j] == 0 {
+			if a[i][j] == -0 || math.Abs(a[i][j]) < 0.00000001 {
 				// необходимо чтобы избавиться от -0
 				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
 			} else {
@@ -358,10 +389,14 @@ func (a matrix) dumpSeidel(answer *widget.Label) {
 			}
 		}
 		answer.Text = answer.Text + fmt.Sprintf("%9v ", "")
-		answer.Text = answer.Text + fmt.Sprintf("%9f ", a[i][len(a)])
-		answer.SetText(answer.Text)
-		answer.Text = answer.Text + fmt.Sprint("\n")
-		answer.SetText(answer.Text)
+		if a[i][len(a)] == -0 || math.Abs(a[i][len(a)]) < 0.00000001 {
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+		} else {
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", a[i][len(a)])
+			answer.SetText(answer.Text)
+			answer.Text = answer.Text + fmt.Sprint("\n")
+			answer.SetText(answer.Text)
+		}
 	}
 	answer.Text = answer.Text + fmt.Sprint("\n")
 	answer.Text = answer.Text + fmt.Sprint("-----------------------------")
