@@ -31,7 +31,7 @@ type vector []float64
 func main() {
 	newApp := app.New()
 	w := newApp.NewWindow("Метод Гаусса")
-	w.Resize(fyne.NewSize(300, 400))
+	w.Resize(fyne.NewSize(300, 600))
 	w.CenterOnScreen()
 
 	label := widget.NewLabel("Введите размер матрицы ")
@@ -40,6 +40,8 @@ func main() {
 	entry1 := widget.NewEntry()
 	label2 := widget.NewLabel("Векторы")
 	entry2 := widget.NewEntry()
+	label3 := widget.NewLabel("Приближение(только для метода Зейделя)")
+	entry3 := widget.NewEntry()
 
 	answer := widget.NewLabel("")
 
@@ -185,6 +187,7 @@ func main() {
 	})
 	btn2 := widget.NewButton("Посчитать методом Зейделя", func() {
 		//flag := false
+		var eps float64
 		answer.SetText("")
 		n, err := strconv.Atoi(entry.Text)
 		if err != nil {
@@ -196,9 +199,12 @@ func main() {
 
 		numsStr := strings.FieldsFunc(entry1.Text, splitFunc)
 		vecStr := strings.FieldsFunc(entry2.Text, splitFunc)
+		epsStr := entry3.Text
 
 		nums := make([]float64, n*n)
 		vecs := make([]float64, n)
+
+		eps, err = strconv.ParseFloat(epsStr, 64)
 
 		for i := 0; i < len(numsStr); i++ {
 			nums[i], err = strconv.ParseFloat(numsStr[i], 64)
@@ -227,8 +233,6 @@ func main() {
 			a[i][n] = vecs[i]
 		}
 		//----------------------------------------------
-		var eps float64
-		fmt.Scan(&eps)
 
 		maxEl := 0.0
 		maxId := 0
@@ -293,8 +297,6 @@ func main() {
 			fmt.Printf("%.8f ", previousVariableValues[i])
 		}
 
-		return
-
 	})
 
 	w.SetContent(container.NewVBox(
@@ -302,6 +304,7 @@ func main() {
 		label1, entry1,
 		label2, entry2,
 		btn1,
+		label3, entry3,
 		btn2,
 		scr,
 	))
@@ -313,6 +316,32 @@ func main() {
 // отображение дампа матрицы
 
 func (a matrix) dump(index []int, answer *widget.Label, b vector) {
+	answer.Text = answer.Text + "Матрица\n"
+	answer.SetText(answer.Text)
+	for i := range a {
+		for j := range a[i] {
+			if a[i][index[j]] == 0 {
+				// необходимо чтобы избавиться от -0
+				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", 0.0)
+			} else {
+				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", a[i][index[j]])
+				answer.SetText(answer.Text)
+			}
+		}
+		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", "")
+		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", b[index[i]])
+		answer.SetText(answer.Text)
+		answer.Text = answer.Text + fmt.Sprint("\n")
+		answer.SetText(answer.Text)
+	}
+	answer.Text = answer.Text + fmt.Sprint("\n")
+	answer.Text = answer.Text + fmt.Sprint("-----------------------------")
+	answer.Text = answer.Text + fmt.Sprint("\n")
+	answer.SetText(answer.Text)
+	answer.SetText(answer.Text)
+}
+
+func (a matrix) dumpSeidel(index []int, answer *widget.Label) {
 	answer.Text = answer.Text + "Матрица\n"
 	answer.SetText(answer.Text)
 	for i := range a {
