@@ -178,7 +178,7 @@ func main() {
 		if !flag {
 			answer.Text = answer.Text + "Вектор X\n"
 			for i := 0; i < len(x); i++ {
-				answer.Text = answer.Text + fmt.Sprintf("%9.2v ", x[index[i]])
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", x[index[i]])
 			}
 		}
 
@@ -233,7 +233,7 @@ func main() {
 			a[i][n] = vecs[i]
 		}
 		//----------------------------------------------
-
+		a.dumpSeidel(answer)
 		maxEl := 0.0
 		maxId := 0
 
@@ -250,6 +250,8 @@ func main() {
 			maxId = 0
 
 		}
+
+		a.dumpSeidel(answer)
 
 		previousVariableValues := make(vector, n)
 		for i := 0; i < n; i++ {
@@ -292,10 +294,11 @@ func main() {
 			previousVariableValues = currentVariableValues
 		}
 
-		// Выводим найденные значения неизвестных с 8 знаками точности
+		answer.Text = answer.Text + "Вектор X\n"
 		for i := 0; i < n; i++ {
-			fmt.Printf("%.8f ", previousVariableValues[i])
+			answer.Text = answer.Text + fmt.Sprintf("%9f ", previousVariableValues[i])
 		}
+		answer.SetText(answer.Text)
 
 	})
 
@@ -322,14 +325,14 @@ func (a matrix) dump(index []int, answer *widget.Label, b vector) {
 		for j := range a[i] {
 			if a[i][index[j]] == 0 {
 				// необходимо чтобы избавиться от -0
-				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", 0.0)
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
 			} else {
-				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", a[i][index[j]])
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", a[i][index[j]])
 				answer.SetText(answer.Text)
 			}
 		}
-		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", "")
-		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", b[index[i]])
+		answer.Text = answer.Text + fmt.Sprintf("%9v ", "")
+		answer.Text = answer.Text + fmt.Sprintf("%9f ", b[index[i]])
 		answer.SetText(answer.Text)
 		answer.Text = answer.Text + fmt.Sprint("\n")
 		answer.SetText(answer.Text)
@@ -341,21 +344,21 @@ func (a matrix) dump(index []int, answer *widget.Label, b vector) {
 	answer.SetText(answer.Text)
 }
 
-func (a matrix) dumpSeidel(index []int, answer *widget.Label) {
+func (a matrix) dumpSeidel(answer *widget.Label) {
 	answer.Text = answer.Text + "Матрица\n"
 	answer.SetText(answer.Text)
 	for i := range a {
 		for j := range a[i] {
-			if a[i][index[j]] == 0 {
+			if a[i][j] == 0 {
 				// необходимо чтобы избавиться от -0
-				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", 0.0)
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
 			} else {
-				answer.Text = answer.Text + fmt.Sprintf("%9.2f ", a[i][index[j]])
+				answer.Text = answer.Text + fmt.Sprintf("%9f ", a[i][j])
 				answer.SetText(answer.Text)
 			}
 		}
-		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", "")
-		answer.Text = answer.Text + fmt.Sprintf("%9.2v ", b[index[i]])
+		answer.Text = answer.Text + fmt.Sprintf("%9v ", "")
+		answer.Text = answer.Text + fmt.Sprintf("%9f ", a[i][len(a)])
 		answer.SetText(answer.Text)
 		answer.Text = answer.Text + fmt.Sprint("\n")
 		answer.SetText(answer.Text)
