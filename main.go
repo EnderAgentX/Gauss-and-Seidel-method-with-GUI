@@ -72,9 +72,7 @@ func main() {
 
 }
 
-// отображение дампа матрицы
-
-func (a matrix) dump(index []int, answer *widget.Label, b vector) {
+func (a matrix) printGauss(index []int, answer *widget.Label, b vector) {
 	answer.Text = answer.Text + "Матрица\n"
 	answer.SetText(answer.Text)
 	for i := range a {
@@ -104,7 +102,7 @@ func (a matrix) dump(index []int, answer *widget.Label, b vector) {
 	answer.SetText(answer.Text)
 }
 
-func (a matrix) dumpSeidel(answer *widget.Label) {
+func (a matrix) printSeidel(answer *widget.Label) {
 	answer.Text = answer.Text + "Матрица\n"
 	answer.SetText(answer.Text)
 	for i := range a {
@@ -142,7 +140,7 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 		panic(err)
 	}
 	splitFunc := func(r rune) bool {
-		return strings.ContainsRune(", ", r)
+		return strings.ContainsRune(", \r", r)
 	}
 
 	numsStr := strings.FieldsFunc(entry1.Text, splitFunc)
@@ -187,7 +185,7 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 	}
 
 	// отображаем исходные данные
-	a.dump(index, answer, b)
+	a.printGauss(index, answer, b)
 
 	// прямой ход (Зануляю элементы под главной диагональю)
 	for i := 0; i < len(a); i++ {
@@ -243,7 +241,7 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 		}
 
 		// отображаем дамп матрицы A и вектора B
-		a.dump(index, answer, b)
+		a.printGauss(index, answer, b)
 	}
 
 	var x vector = make(vector, len(b))
@@ -284,7 +282,7 @@ func seidel(answer *widget.Label, entry, entry1, entry2, entry3 *widget.Entry) {
 		panic(err)
 	}
 	splitFunc := func(r rune) bool {
-		return strings.ContainsRune(", ", r)
+		return strings.ContainsRune(", \r", r)
 	}
 
 	numsStr := strings.FieldsFunc(entry1.Text, splitFunc)
@@ -308,7 +306,6 @@ func seidel(answer *widget.Label, entry, entry1, entry2, entry3 *widget.Entry) {
 	}
 
 	a := make(matrix, n)
-	//b := make(vector, n)
 
 	for i := range a {
 		a[i] = make([]float64, n+1)
@@ -323,7 +320,7 @@ func seidel(answer *widget.Label, entry, entry1, entry2, entry3 *widget.Entry) {
 		a[i][n] = vecs[i]
 	}
 	//----------------------------------------------
-	a.dumpSeidel(answer)
+	a.printSeidel(answer)
 	maxEl := 0.0
 	maxId := 0
 
@@ -354,7 +351,7 @@ func seidel(answer *widget.Label, entry, entry1, entry2, entry3 *widget.Entry) {
 
 	}
 	if !flag {
-		a.dumpSeidel(answer)
+		a.printSeidel(answer)
 
 		// Введем вектор значений неизвестных на предыдущей итерации,
 		// размер которого равен числу строк в матрице, т.е. size,
