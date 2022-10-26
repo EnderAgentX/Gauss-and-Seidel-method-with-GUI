@@ -133,6 +133,7 @@ func (a matrix) printSeidel(answer *widget.Label) {
 }
 
 func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
+	zeroCount := 0
 	flagNoSolutions := false
 	flagManySolutions := false
 	answer.SetText("")
@@ -195,22 +196,24 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 		r := a[i][index[i]]
 
 		// если главный элемент равен нулю, нужно найти другой
-		// методом перестановки колонок в матрице
+		// методом перестановки строк в матрице
 		if r == 0 {
-			maxEl := 0.0
-			maxId := 0
+			for k := 0; k < len(a)-1; k++ {
+				maxEl := 0.0
+				maxId := 0
 
-			for j := i; j < n; j++ {
-				if math.Abs(a[j][i]) > maxEl {
-					maxEl = math.Abs(a[j][i])
-					maxId = j
+				for j := k; j < n; j++ {
+					if math.Abs(a[j][k]) > maxEl {
+						maxEl = math.Abs(a[j][k])
+						maxId = j
+					}
 				}
-			}
-			a[i], a[maxId] = a[maxId], a[i]
-			b[i], b[maxId] = b[maxId], b[i]
+				a[k], a[maxId] = a[maxId], a[k]
+				b[k], b[maxId] = b[maxId], b[k]
 
-			maxEl = 0
-			maxId = 0
+				maxEl = 0
+				maxId = 0
+			}
 
 		}
 		zero := 0.0
@@ -220,14 +223,16 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 			if zero == 0.0 {
 				if b[k] == 0.0 {
 					flagManySolutions = true
-					answer.SetText("система имеет множество решений")
+					zeroCount++
+					//answer.SetText("система имеет множество решений")
 				} else {
-					answer.SetText("система не имеет решений")
+					//answer.SetText("система не имеет решений")
 					flagNoSolutions = true
 					break
 				}
-
+				a.printGauss(index, answer, b)
 			}
+
 		}
 
 		if flagNoSolutions {
@@ -235,10 +240,12 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 		}
 
 		// деление элементов текущей строки, на главный элемент
-		for j := 0; j < len(a[i]); j++ {
-			a[i][index[j]] /= r
+		if r != 0 {
+			for j := 0; j < len(a[i]); j++ {
+				a[i][index[j]] /= r
+			}
+			b[i] /= r
 		}
-		b[i] /= r
 
 		// вычитание текущей строки из всех ниже расположенных строк с занулением I - ого элемента в каждой из них
 		for k := i + 1; k < len(a); k++ {
@@ -269,7 +276,7 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 
 	if !flagNoSolutions {
 		answer.Text = answer.Text + "Вектор X\n"
-		for i := 0; i < len(x); i++ {
+		for i := 0; i < len(x)-zeroCount; i++ {
 			if x[index[i]] == 0.0 || math.Abs(x[index[i]]) < 0.00000001 {
 				answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
 			} else {
@@ -277,6 +284,7 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 			}
 		}
 	}
+	answer.Text = answer.Text + "\n"
 	if flagManySolutions {
 		answer.Text = answer.Text + fmt.Sprintf("Система имеет множество решений\n")
 	}
