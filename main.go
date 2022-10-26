@@ -133,7 +133,8 @@ func (a matrix) printSeidel(answer *widget.Label) {
 }
 
 func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
-	flag := false
+	flagNoSolutions := false
+	flagManySolutions := false
 	answer.SetText("")
 	n, err := strconv.Atoi(entry.Text)
 	if err != nil {
@@ -212,16 +213,24 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 			maxId = 0
 
 		}
-		r = a[i][i]
-
+		zero := 0.0
 		// если главный элемент строки равен 0, метод гаусса не работает
-		if r == 0 {
-			if b[i] == 0 {
-				answer.SetText("система имеет множество решений")
-			} else {
-				answer.SetText("система не имеет решений")
+		for k := 0; k < n; k++ {
+			zero = a[k][k]
+			if zero == 0.0 {
+				if b[k] == 0.0 {
+					flagManySolutions = true
+					answer.SetText("система имеет множество решений")
+				} else {
+					answer.SetText("система не имеет решений")
+					flagNoSolutions = true
+					break
+				}
+
 			}
-			flag = true
+		}
+
+		if flagNoSolutions {
 			break
 		}
 
@@ -258,7 +267,7 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 		}
 	}
 
-	if !flag {
+	if !flagNoSolutions {
 		answer.Text = answer.Text + "Вектор X\n"
 		for i := 0; i < len(x); i++ {
 			if x[index[i]] == 0.0 || math.Abs(x[index[i]]) < 0.00000001 {
@@ -268,9 +277,11 @@ func gauss(answer *widget.Label, entry, entry1, entry2 *widget.Entry) {
 			}
 		}
 	}
-
+	if flagManySolutions {
+		answer.Text = answer.Text + fmt.Sprintf("Система имеет множество решений\n")
+	}
 	answer.SetText(answer.Text)
-	flag = false
+	flagNoSolutions = false
 }
 
 func seidel(answer *widget.Label, entry, entry1, entry2, entry3 *widget.Entry) {
@@ -384,6 +395,21 @@ func seidel(answer *widget.Label, entry, entry1, entry2, entry3 *widget.Entry) {
 					}
 				}
 				currentVariableValues[i] /= a[i][i]
+				if previousVariableValues[i] == 0.0 || math.Abs(previousVariableValues[i]) < 0.00000001 {
+					previousVariableValues[i] = 0.0
+				}
+				answer.Text = answer.Text + "Вектора невязки\n"
+
+				for i := 0; i < n; i++ {
+					if previousVariableValues[i] == 0.0 || math.Abs(previousVariableValues[i]) < 0.00000001 {
+						answer.Text = answer.Text + fmt.Sprintf("%9f ", 0.0)
+					} else {
+						answer.Text = answer.Text + fmt.Sprintf("%9f ", previousVariableValues[i])
+					}
+
+				}
+				answer.Text = answer.Text + "\n"
+				answer.SetText(answer.Text)
 			}
 
 			errEps := 0.0
